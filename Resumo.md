@@ -211,7 +211,7 @@ Pode-se utilizar uma função polinomial para aproximar melhor, de forma que
 Primeiro, define-se uma função para substituir o erro quadrático médio, que não funciona para *Logistic Regression*, já que a função não seria convexa:
 $$
 Cost(h_\theta(x),y)=\begin{cases}
--\log(h_\theta(x)),&\text{se}\quad y=1\\ -\log(1-h_\theta(x)),&\text{se}\quad y=0
+-\ln(h_\theta(x)),&\text{se}\quad y=1\\ -\ln(1-h_\theta(x)),&\text{se}\quad y=0
 \end{cases}
 $$
 Define-se então a função de custo, agora convexa, para *Logistic Regression*:
@@ -224,7 +224,7 @@ $$
 
 Ainda, para o caso binário $y \in \{0,1\}$, pode-se escrever $J(\theta)$ da seguinte forma:
 $$
-J(\theta)=-\frac1m\sum_{i=1}^m y^i\log(h_\theta(x^i))+(1-y^i)\log(1-h_\theta(x^i))
+J(\theta)=-\frac1m\sum_{i=1}^m y^i\ln(h_\theta(x^i))+(1-y^i)\ln(1-h_\theta(x^i))
 $$
 Tomando o mesmo procedimento com o método gradiente, tomando derivada etc. encontra-se a mesma expressão para a minimização do $J(\theta)$ por meio de $\theta$:
 $$
@@ -286,6 +286,9 @@ $$
 \theta_j:=\theta_j\left(1-\alpha\frac{\lambda}{m}\right)-\alpha\frac{1}{m}\sum_{i=1}^m(h_\theta(x^i)-y^i)x^i_j
 $$
 Usualmente $(1-\alpha\frac{\lambda}{m})$ é menor que 1. Assim essa primeira parcela diminui $\theta_j$ (pra 0.99 do valor por exemplo), aproximando-o de 0 a cada iteração. Diminui-se então o parametro a cada iteração, e é feita sobre essa atualização a regulariação.
+
+### Normal Equation
+
 $$
 \theta = (X^TX+\lambda A)^{-1}X^Ty\\
 A = \begin{vmatrix}0&0&\dots&0\\
@@ -300,7 +303,7 @@ Com $X$ sendo $m\times (n+1)$, $y: m\times1$ e $A:(n+1)\times(n+1)$, tipo uma ma
 
 A função de custo é modificada para:
 $$
-J(\theta)=-\left(\frac1m\sum_{i=1}^m y^i\log(h_\theta(x^i))+(1-y^i)\log(1-h_\theta(x^i))\right)+\frac\lambda {2m}\sum_{j=1}^n\theta_j^2
+J(\theta)=-\left(\frac1m\sum_{i=1}^m y^i\ln(h_\theta(x^i))+(1-y^i)\ln(1-h_\theta(x^i))\right)+\frac\lambda {2m}\sum_{j=1}^n\theta_j^2
 $$
 E o update de $\theta$ se torna "igual" ao da regressão linear:
 $$
@@ -310,6 +313,193 @@ $$
 \end{cases}
 $$
 
+# Neural Networks
+
+Há uma mudança de nomenclaturas para redes neurais:
+
+![](./imgs/2020-12-17_19-46.png)
+
+## Forward Propagation
+
+![](./imgs/2020-12-17_19-54.png)
+
+> $a_i^j\ - $ *activation* da unidade $i$ na *layer* $j$
+>
+> $\Theta^j\ -$ matriz de pesos que controlam a função de mapeamento da *layer* $j$ para a *layer* $j+1$
+
+Representado pela rede neural, tem-se:
+$$
+a_1^2 = g(\Theta^1_{10}x_0+\Theta^1_{11}x_1+\Theta^1_{12}x_2+\Theta^1_{13}x_3)\\
+a_2^2 = g(\Theta^1_{20}x_0+\Theta^1_{21}x_1+\Theta^1_{22}x_2+\Theta^1_{23}x_3)\\
+a_3^2 = g(\Theta^1_{30}x_0+\Theta^1_{31}x_1+\Theta^1_{32}x_2+\Theta^1_{33}x_3)\\
+h_\Theta(x)=a_1^3=g(\Theta_{10}^2a_0^2+\Theta_{11}^2a_1^2+\Theta_{12}^2a_2^2+\Theta_{13}^2a_3^2)
+$$
+Se uma rede tem $s_j$ unidades na *layer* $j$ e $s_{j+1}$ unidades na *layer* $j+1$, então a matriz $\Theta^j$ terá dimensão $(s_{j+1}\times s_j+1)$ $\implies\Theta^j\in\mathbb{M}_{s_{j+1}\times s_j+1}(\mathbb{K})$. O $+1$ é devido aos *bias*, fazendo algo como: o output nao inclui os nodos *bias*, mas os inputs sim.
+
+### Forma Vetorizada
+
+$$
+z^j =\Theta^{j-1}a^{j-1}, \quad x=a^1\\
+a^j=g(z^j)
+$$
+
+Para computar a hipótese, concatena-se o $a_0=1$ e, tomando $N$ como a última *layer*:
+
+$$
+z^N=\Theta^{N-1}a^{N-1}\\
+h_\Theta(x)=a^N=g(z^N)
+$$
+
+![](./imgs/2020-12-19_22-14.png)
+
+> $\Theta^{j-1}:(s_{j}\times n+1),\quad a^{j-1} : (n+1)\times1,\quad z^j: s^j\times1$
+
+### Multiclass
+
+A hipótese $h_\Theta(x)$ será um vetor binário, com dimensão $n\times1$, onde $n$ é o número de classificações do problema. O vetor $y^i$ do *training set* será da mesma forma.
+
+![](./imgs/2020-12-20_12-14.png)
+
+## Cost Function
+
+> $K$ - número de unidades de saída
+>
+> $L$ - número total de *layers*
+>
+> $s_l$ - número de unidades(sem contar as *bias units*) na *layer* $l$
+
+$$
+h_\Theta(x)\in\R^K, \quad (h_\Theta(x))_i = i^{th}\text{ output}
+$$
+
+$$
+J(\Theta)=-\frac{1}{m}\left[\sum_{i=1}^m\sum_{k=1}^Ky_k^i\ln(h_\Theta(x^i))_k+(1-y_k^i)\ln(1-(h_\Theta(x^i))_k)\right]+\frac{\lambda}{2m}\sum_{l=1}^{L-1}\sum_{i=1}^{s_l}\sum_{j=1}^{s_{l+1}}(\Theta_{ji}^l)^2
+$$
+
+## Backpropagation
+
+Intuição: pra cada nodo, computar-se-á um "erro" $\delta_j^l$ do nodo $j$ na *layer* $l$
+$$
+\delta_j^K = a_j^K-y_j=(h_\Theta(x))_j-y_j\\
+\delta^{K-1} = (\Theta^{K-1})^T\delta^K.* g'(z^{K-1})\\
+g'(z^n)=a^n.*(1-a^n)
+$$
+Sem $\delta^1$, já que não se pretende corrigir o *input*. Assim, as derivadas parciais, sem *regularization* se tornam:
+$$
+\frac{\partial}{\partial\Theta_{ij}^l}J(\Theta) = a_j^l\delta_i^{l+1}
+$$
+De forma vetorizada para algoritmo
+$$
+\Delta^l=\Delta^l+\delta^{l+1}(a^{l})^T\\
+\frac{\partial}{\partial\Theta_{ij}^l}J(\Theta)=D_{ij}^l:=\begin{cases}
+\frac 1m\Delta_{ij}^l+\lambda\Theta_{ij}^l,&j\neq0\\
+\frac 1m\Delta_{ij}^l,&j=0
+\end{cases}
+$$
+![](./imgs/bpalg.png)
+
+### Gradient Checking
+
+Para testar se o *backpropagation* realmente está funcionando, convém testar se o gradiente é próximo das aproximações das derivadas, dadas por:
+$$
+\frac{\partial J(\theta)}{\partial\theta_1}\approx\frac{J(\theta+\varepsilon)-J(\theta-\varepsilon)}{2\varepsilon}
+$$
+Para um epsilon suficientemente pequeno ($\varepsilon=10^{-4}$)
+
+### Inicialização de $\Theta$
+
+Inicializar tudo como $0$ não é viável para redes neurais, já quetorna todos os $a$ e $\delta$ iguais, portanto se inicializa os parâmetros de forma aleatória entre valores pertencentes a $[-\epsilon,\ \epsilon]$. Processo tomado como *random initialization* ou *symmetry breaking*
+
+![](./imgs/epsilon.png)
+
+## Melhorando o algoritmo
+
+Existem diversas opções para melhora do algoritmo, porém somente alguns realmente ajudam dependendo do problema. Dentre as opções
+
+- Pegar mais exemplos de treino
+- Tentar um conjunto menor de *features*
+- Tentar tomar *features* adicionais
+- Tentar tomar *features* polinomiais
+- Diminuir $\lambda$
+- Aumentar $\lambda$
+
+Precisa-se ter certo conhecimento a priori de qual realmente será útil, para que não se gaste tempo desnecessário adquirindo dados não úteis ou implementando algo que não irá ajudar. Assim, existem técnicas para facilitar esse processo e nortear a escolha das mudanças a serem empregadas.
+
+### Testando a hipótese
+
+Para ter se estimar se a hipótese está boa, pra maioria dos casos, será difícil plotar o gráfico da hipótese e analisar seu comportamento de forma gráfica, assim é comum que se divida o *training set* em partes, $70/30$ por exemplo. E esses $70\%$ são usados para treinar a rede e os 30 restantes são usados para testar a qualidade do algoritmo. Se o banco de dados é ordenado, é melhor tomar esses $70\%$ aleatoriamente. Após, computa-se o erro dado pelo algoritmo nesse banco de dados teste, $30\%$ do BD. Para o caso de regressão linear, pode-se tomar o erro quadrático médio:
+$$
+J_{test}(\theta)=\frac{1}{2m_{test}}\sum_{i=1}^{m_{test}}(h_\theta(x^i_{test})-y^i_{test})^2
+$$
+Para regressão logística:
+$$
+J_{test}(\theta)=-\frac{1}{m_{test}}\sum_{i=1}^{m_{test}}y_{test}^i\ln\left(h_\theta(x^i_{test})\right)+(1-y^i_{test})\ln(1-h_{\theta}\left(x^i_{test})\right)
+$$
+​	ou um erro de classificação errada:
+$$
+err\big(h_\theta(x),y\big) = \begin{cases}
+1;& h_\theta(x)\ge0.5,\ y=0\\
+& ou\  h_\theta(x)<0.5,\ y=1\\
+0; & c.c.
+\end{cases}
+$$
+
+$$
+Test\ error = \frac{1}{m_{test}}\sum_{i=1}^{m_{test}}err\big(h_\theta(x^i_{test}),y^i_{test}\big)
+$$
+
+ ### Model Selection
+
+Determinando o grau do polinômio a ser aproximado:
+
+![](./imgs/a1.png)
+
+Para avaliar a qualidade do grau de polinomio, divide-se o *training set* em 3 parcelas: $60\%$ de treino, $20\%$ de *validation set* ou *cross validation* e $20\%$ de conjunto de teste. A determinação do grau de polinômio a ser utilizado será dada pelo menor erro obtido ($J_{cv}$) ao se estimar o *validation set* com base nos parâmetros $\theta$ obtidos por cada modelo. E assim, pode-se determinar o erro generalizado para a aproximação por meio do erro obtido no test case ($J_{test}$).
+
+### Underfitting vs Overfitting
+
+Tomando-se os erros do *validation set* e *training set* pode-se estimar qual dos dois problemas é presente.
+
+![](./imgs/underfitoverfit.png)
+
+### Escolhendo o parâmetro $\lambda$ de regulaziração
+
+Para os erros de *training set, validation set e test set*, será ignorado a regularização, de forma a se definir a situação de overfitting ou underfitting. Então, determina-se os parâmetros $\theta$ ao se minimizar $J$ e escolhe-se $\lambda$ pelo menor $J_{cv}$ obtido. Calcula-se então $J_{test}$ para se estimar o erro generalizado do algoritmo.
+
+Ao plotar-se os erros em função de $\lambda$, encontra-se um comportamento da seguinte forma, no qual os estados de underfitting e overfitting estão trocados com relação ao anterior:
+
+![](./imgs/regunderover.png)
+
+### Learning Curves
+
+Um método interessante para se avaliar se há overfitting, underfitting ou um pouco de ambos, é plotar *learning curves*:
+
+![](./imgs/learningcurve.png)
+
+Esse processo é tomado com base em tomar valores arbitrários de *training set* de forma a se comparar os erros para cada dado adicional.
+
+No caso de *high-bias* (underfitting), o erro $J_{cv}$ converge para um valor que não melhora muito com a adição de mais exemplos.
+
+![](./imgs/highbias.png)
+
+Para o caso de overfitting, nota-se uma distância grande entre $J_{cv}$ e $J_{train}$. Para esse caso, a obtenção de novos dados pode ser útil.
+
+![](./imgs/highvariance.png) 
+
+Assim, os métodos citados inicialmente, podem ser traduzidos para poder melhorar os seguintes casos:
+
+- Pegar mais exemplos de treino -> melhorar o caso de *high variance*
+- Tentar um conjunto menor de *features* -> melhorar o caso de *high variance*
+- Tentar tomar *features* adicionais -> melhorar o caso de *high bias* (nem sempre)
+- Tentar tomar *features* polinomiais -> melhorar o caso de *high bias*
+- Diminuir $\lambda$ -> melhorar o caso de *high bias*
+- Aumentar $\lambda$ -> melhorar o caso de *high variance*
+
+### Arquitetura da rede
+
+![](./imgs/neuralarch.png)
+
+Como no geral, quanto maior a rede, melhor, usa-se regularização para evitar o overfitting. Para se determinar o número de hidden layers, pode-se utilizar o teste de $J_{cv}$ para se estimar o melhor número de *hidden layers* pelo menor erro. Utilizar uma só *hidden layer* é um bom default.
 
 # Unsupervised Learning
 
