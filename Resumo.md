@@ -1,3 +1,5 @@
+
+
 # Machine Learning
 
 ---
@@ -501,6 +503,60 @@ Assim, os métodos citados inicialmente, podem ser traduzidos para poder melhora
 
 Como no geral, quanto maior a rede, melhor, usa-se regularização para evitar o overfitting. Para se determinar o número de hidden layers, pode-se utilizar o teste de $J_{cv}$ para se estimar o melhor número de *hidden layers* pelo menor erro. Utilizar uma só *hidden layer* é um bom default.
 
+### Skewed Classes
+
+Quando o DB tem mais resultados de uma classe do que de outra, claramente o erro medido é enviesado. Portanto, deve-se mudar a métrica para o erro
+
+![](./imgs/skewedclass.png)
+
+Se o algoritmo tem *precision* e *recall* altos, tem-se uma certeza de que o algoritmo funciona bem, mesmo com as classes enviesadas.
+
+![](./imgs/tradeoff.png)
+
+![](./imgs/fscore.png)
+
+Para determinar então o *threshold*, pode-se tomar o valor que maximiza o F score no *cross validation set*
+
+# Support Vector Machine
+
+Hipótese:
+$$
+\min_\theta C\sum_{i=1}^m\left(y^icost_1(\theta^Tx^i)+(1-y^i)cost_0(\theta^Tx^i)\right) + \frac12\sum_{j=1}^n\theta_j^2
+$$
+Resulta em $1\ se\ \theta^Tx\ge0,\quad0\ c.c.$
+
+![](./imgs/svm.png)
+
+![](./imgs/svmbound.png)
+
+![](./imgs/svmg.png)
+
+## Kernels
+
+Para definir as *features* de uma forma melhor
+
+![](./imgs/kernels1.png)
+
+![](./imgs/kersim.png)
+
+![](./imgs/kerrr.png)
+
+![](./imgs/kerplot.png)
+
+Inicialmente, toma-se os *landmarks* ($\ell_i$) como os próprios exemplos de treino $x_i$ 
+
+![](./imgs/ker1.png)
+
+![](./imgs/ker2.png)
+
+![](./imgs/svm2.png)
+
+Ao utilizar o kernel gaussiano, é importante utilizar feature scaling antes de aplicar o kernel.
+
+![](./imgs/svmvslin.png)
+
+
+
 # Unsupervised Learning
 
 Não se tem o output pros dados de entrada. Existe um grande banco de dados, mas não se sabe classificar ou separá-los. Tem-se uma mínima ideia, ou nenhuma, de como deveria ser o output dos dados. Não se sabe o efeito das variáveis.
@@ -509,6 +565,160 @@ Não se tem o output pros dados de entrada. Existe um grande banco de dados, mas
 
 Separa os dados em *clusters* (categorias). Exemplo: pegar um banco de dados de DNA e estimar que a concentração de algum gene relaciona com a idade, localização, etc.
 
+### K-Means
+
+Primeiro, inicializa $K$ pontos aleatórios, pra ter $K$ clusters, chamados *cluster centroids*. Com isso, o algoritmo vai tomar o data set e determinar a classificação dos pontos com base nas centroides. Após, muda a centroide para a média dos pontos que foram classificados. Repete o processo até a convergência.
+
+![](./imgs/kmeans1.png)
+
+![](./imgs/kmeans2.png)
+
+Se o cluster fica com $0$ pontos associados, elimina-se o cluster (tendo então $K-1$ clusters) ou se toma valores alaetórios para ele. A eliminação é mais usual e isso não ocorre tão frequentemente.
+
+![](./imgs/kmeans3.png)
+
+#### Optimization Objective
+
+![](./imgs/kmeans4.png)
+
+#### Random Initialization
+
+$K<m$, m - número de training examples. Pega, randomicamente, $K$ exemplos de treino. Torna $\mu_1,\dots,\mu_k$ igual a esses $K$ exemplos.
+
+K-means pode convergir pra um mínimo local e sua convergência é dependente da inicialização aleatória. Para diminuir a probabilidade disso acontecer $\rightarrow$ inicializar várias vezes os clusters aleatoriamente. Melhor pra quando se tem poucos clusters
+
+#### Escolhendo o número de clusters
+
+![](./imgs/kmeans5.png)
+
+![](./imgs/kmeans6.png)
+
+### Dimensionality Reduction
+
+![](./imgs/dimred1.png)
+
+### Principal Component Analysis (PCA)
+
+![](./imgs/pca1.png)
+
+![](./imgs/pca2.png)
+
+#### Data preprocessing
+
+![](./imgs/pca3.png)
+
+#### Algorithm
+
+![](./imgs/pca4.png)
+
+![](./imgs/pca5.png)
+
+#### Reconstruction
+
+Para retomar os valores originais de $x$ a partir dos valores $z$, toma-se a seguinte aproximação:
+$$
+x_{approx} = U_{reduce}z
+$$
+
+#### Escolhendo $k$
+
+$k$ - número de *principal components* 
+
+![](./imgs/pca6.png)
+
+![](./imgs/pca7.png)
+
+![](./imgs/pca8.png)
+
+![](./imgs/pca9.png)
+
+![](./imgs/pca10.png)
+
+
+
 ## Non-Clustering
 
 Exemplo: cocktail party - separar vozes a partir de gravações diferentes do mesmos sons
+
+### Anomaly Detection
+
+![](./imgs/anomaly1.png)
+
+Assumindo que se tenha vetores $y$ para os labels, pode-se avaliar a presença de features por:
+
+![](./imgs/anomaly2.png)
+
+![](./imgs/anomaly3.png)
+
+![](./imgs/anomaly4.png)
+
+### Recommender System
+
+![](./imgs/recom1.png)
+
+![](./imgs/recom2.png)
+
+#### Collaborative Filtering
+
+Não se tem uma avaliação para as características dos filmes. Tudo baseado nos usuários, que informam oquanto gostam do gênero X.
+
+![](./imgs/recom3.png)
+
+![](./imgs/recom4.png)
+
+![](./imgs/recom5.png)
+
+![](./imgs/recom6.png)
+
+Com esse último algoritmo, tem-se $x \in \R^n, \theta\in \R^n$, ou seja, não existe o termo unitário $x_0$. 
+
+![](./imgs/recom7.png)
+
+#### Low Rank Matrix Factorization
+
+![](./imgs/recom8.png)
+
+![](./imgs/recom9.png)
+
+![](./imgs/recom10.png)
+
+![](./imgs/recom11.png)
+
+# Large Scale Machine Learning
+
+## Stochastic Gradient Descent
+
+![](./imgs/stoc1.png)
+
+![](./imgs/stoc2.png)
+
+Não converge bonitinho, mas fica rodando em volta do mínimo
+
+![](./imgs/stoc3.png)
+
+![](./imgs/stoc4.png)
+
+![](./imgs/stoc5.png)
+
+Não é tão utilizado, pois precisa-se gastar tempo para determinar os $const$
+
+## Mini-Batch Gradient Descent
+
+![](./imgs/minibatch1.png)
+
+![](./imgs/minibatch2.png)
+
+Melhor que o estocástico se vetorizar
+
+## Online Learning
+
+![](./imgs/onle1.png)
+
+![](./imgs/onle2.png)
+
+## Map Reduce and Data Parallelism
+
+![](./imgs/mapred1.png)
+
+![](./imgs/mapred2.png)
+

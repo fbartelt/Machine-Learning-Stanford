@@ -20,8 +20,11 @@ idx = zeros(size(X,1), 1);
 %
 % Note: You can use a for-loop over the examples to compute this.
 %
-
-
+aux = zeros(size(X,1),K);
+for i = 1:K
+    aux(:,i) = vecnorm(X-centroids(i,:),2,2).^2;
+end
+[~, idx] = min(aux, [], 2);
 
 
 
